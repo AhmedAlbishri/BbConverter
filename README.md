@@ -5,4 +5,4 @@ Blackboard Exam Questions Converter Tool
 - MCQs
 - Essay
 
-Try here: [Link](https://ahmedalbishri.github.io/BbConverter/)
+Try here: <a href="https://ahmedalbishri.github.io/BbConverter/" target="_blank">Link</a>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blackboard Question Converter</title>
+    <!-- Link to external CSS file -->
+    <link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+<div class="container">
+    <h1>Blackboard Question Converter</h1>
+    <p>Paste your questions from Word into the first text area. Ensure each question follows this structure:<br>
+        1. question text? (LO#) (Dr. XXXXX) (Module Number X) [Difficulty Level: LOW/Mid/HIGH].
+        Choices should start with a letter (e.g., "a."). Click convert to see the Blackboard formatted version in the second text area.</p>
+
+    <!-- Counter Display -->
+    <p><strong>Questions Converted: <span id="questionCounter">0</span></strong></p>
+
+    <div class="input-container">
+        <textarea id="inputText" placeholder="Paste your questions here..."></textarea>
+        <textarea id="outputText" placeholder="Blackboard formatted questions..."></textarea>
+    </div>
+    <div class="button-container">
+        <button onclick="convertQuestions()">Convert</button>
+        <button onclick="downloadOutput()">Download as .txt</button>
+    </div>
+</div>
+
+<!-- Link to external JS file -->
+<script src="src/script.js"></script>
+</body>
+</html>

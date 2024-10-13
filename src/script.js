@@ -65,9 +65,9 @@ function convertQuestions() {
         const correctness = choice === item.correctAnswer ? "correct" : "incorrect";
         line += `\t${choice}\t${correctness}`;
       });
-      blackboardContent += line + "\n\n";  // Add extra line break after each question block
+      blackboardContent += line + "\n"; 
     } else if (item.type === "Essay") {
-      blackboardContent += `ESS\t${item.question}\t[Placeholder essay text]\n\n`;  // Add extra line break after each essay
+      blackboardContent += `ESS\t${item.question}\t[Placeholder essay text]\n`;
     }
   });
 

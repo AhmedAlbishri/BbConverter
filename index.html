@@ -9,22 +9,58 @@
 </head>
 <body>
 <div class="container">
-    <h1>Blackboard Question Converter</h1>
-    <p>Paste your questions from Word into the first text area. Ensure each question follows this structure:<br></p>
-    <h4>1. question text? (LO#) (Dr. XXXXX) (Module Number X) [Difficulty Level: LOW/Mid/HIGH].</h4>
-        Choices should start with a letter (e.g., "a."). Click convert to see the Blackboard formatted version in the second text area.
+    <!-- Navigation Bar -->
+    <ul>
+        <li><a class="tablinks active" href="javascript:void(0)" onclick="openTab(event, 'MCQ')">MCQ</a></li>
+        <li><a class="tablinks" href="javascript:void(0)" onclick="openTab(event, 'Essay')">Essay</a></li>
+        <li><a class="tablinks" href="javascript:void(0)" onclick="openTab(event, 'TrueFalse')">True/False</a></li>
+        <li><a class="tablinks" href="javascript:void(0)" onclick="openTab(event, 'Matching')">Matching</a></li>
+        <li><a class="tablinks" href="javascript:void(0)" onclick="openTab(event, 'Numeric')">Numeric Response</a></li>
+    </ul>
 
-    <!-- Counter Display -->
-    <p><strong>Questions Converted: <span id="questionCounter">0</span></strong></p>
-
-    <div class="input-container">
-        <textarea id="inputText" placeholder="Paste your questions here..."></textarea>
-        <textarea id="outputText" placeholder="Blackboard formatted questions..."></textarea>
+    <!-- MCQ Tab Content -->
+    <div id="MCQ" class="tabcontent" style="display: block;">
+        <h3>MCQ Questions</h3>
+        <textarea id="mcqText" placeholder="Paste your MCQ questions here..."></textarea>
+        <p><strong>Questions in MCQ: <span id="mcqCounter">0</span></strong></p>
     </div>
+
+    <!-- Essay Tab Content -->
+    <div id="Essay" class="tabcontent">
+        <h3>Essay Questions</h3>
+        <textarea id="essayText" placeholder="Paste your essay questions here..."></textarea>
+        <p><strong>Questions in Essay: <span id="essayCounter">0</span></strong></p>
+    </div>
+
+    <!-- True/False Tab Content -->
+    <div id="TrueFalse" class="tabcontent">
+        <h3>True/False Questions</h3>
+        <textarea id="tfText" placeholder="Paste your True/False questions here..."></textarea>
+        <p><strong>Questions in True/False: <span id="tfCounter">0</span></strong></p>
+    </div>
+
+    <!-- Matching Tab Content -->
+    <div id="Matching" class="tabcontent">
+        <h3>Matching Questions</h3>
+        <textarea id="matchingText" placeholder="Paste your Matching questions here..."></textarea>
+        <p><strong>Questions in Matching: <span id="matchingCounter">0</span></strong></p>
+    </div>
+
+    <!-- Numeric Response Tab Content -->
+    <div id="Numeric" class="tabcontent">
+        <h3>Numeric Response Questions</h3>
+        <textarea id="numericText" placeholder="Paste your Numeric Response questions here..."></textarea>
+        <p><strong>Questions in Numeric Response: <span id="numericCounter">0</span></strong></p>
+    </div>
+
+    <!-- Buttons -->
     <div class="button-container">
         <button onclick="convertQuestions()">Convert</button>
         <button onclick="downloadOutput()">Download as .txt</button>
     </div>
+
+    <textarea id="outputText" placeholder="Converted Blackboard questions..." readonly></textarea>
+
 </div>
 
 <!-- Link to external JS file -->

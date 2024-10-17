@@ -32,39 +32,46 @@ function liveCountQuestionsByNumber(text) {
   return questionCount;
 }
 
-// Function to count MCQs (count the number of actual questions, not choices)
-function countMCQs(text) {
-  let mcqBlocks = text.split('\n\n').filter(block => block.trim() !== '');
-  return mcqBlocks.length;
+// Function to update the total number of questions
+function updateTotalQuestions() {
+  const mcqCount = parseInt(document.getElementById('mcqCounter').textContent) || 0;
+  const essayCount = parseInt(document.getElementById('essayCounter').textContent) || 0;
+  const tfCount = parseInt(document.getElementById('tfCounter').textContent) || 0;
+  const fibCount = parseInt(document.getElementById('fibCounter').textContent) || 0;
+
+  const totalCount = mcqCount + essayCount + tfCount + fibCount;
+  document.getElementById('totalQuestions').textContent = totalCount;
 }
 
 
-// Update the MCQ counter in real-time
+
+// Call updateTotalQuestions after each counter is updated
 function liveCountMCQs() {
   const mcqText = document.getElementById('mcqText').value;
   const count = liveCountQuestionsByNumber(mcqText);
-  document.getElementById('mcqCounter').textContent = count;  // Update MCQ counter
+  document.getElementById('mcqCounter').textContent = count;
+  updateTotalQuestions();  // Update total after counting MCQs
 }
 
-// Update the Essay counter in real-time
 function liveCountEssay() {
   const essayText = document.getElementById('essayText').value;
   const count = liveCountQuestionsByNumber(essayText);
-  document.getElementById('essayCounter').textContent = count;  // Update Essay counter
+  document.getElementById('essayCounter').textContent = count;
+  updateTotalQuestions();  // Update total after counting Essays
 }
 
-// Update the True/False counter in real-time
 function liveCountTF() {
   const tfText = document.getElementById('tfText').value;
   const count = liveCountQuestionsByNumber(tfText);
-  document.getElementById('tfCounter').textContent = count;  // Update TF counter
+  document.getElementById('tfCounter').textContent = count;
+  updateTotalQuestions();  // Update total after counting T/F
 }
 
-// Update the FIB counter in real-time
 function liveCountFIB() {
   const fibText = document.getElementById('fibText').value;
   const count = liveCountQuestionsByNumber(fibText);
-  document.getElementById('fibCounter').textContent = count;  // Update FIB counter
+  document.getElementById('fibCounter').textContent = count;
+  updateTotalQuestions();  // Update total after counting FIB
 }
 
 // Function to strip metadata if toggle is checked

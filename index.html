@@ -14,48 +14,47 @@
         <li><a class="tablinks active" href="javascript:void(0)" onclick="openTab(event, 'MCQ')">MCQ</a></li>
         <li><a class="tablinks" href="javascript:void(0)" onclick="openTab(event, 'Essay')">Essay</a></li>
         <li><a class="tablinks" href="javascript:void(0)" onclick="openTab(event, 'TrueFalse')">True/False</a></li>
-        <li><a class="tablinks" href="javascript:void(0)" onclick="openTab(event, 'Matching')">Matching</a></li>
-        <li><a class="tablinks" href="javascript:void(0)" onclick="openTab(event, 'Numeric')">Numeric Response</a></li>
+        <li><a class="tablinks" href="javascript:void(0)" onclick="openTab(event, 'FIB')">Fill in the Blank</a></li>
     </ul>
 
     <!-- MCQ Tab Content -->
-    <div id="MCQ" class="tabcontent" style="display: block;">
-        <h3>MCQ Questions</h3>
-        <textarea id="mcqText" placeholder="Paste your MCQ questions here..."></textarea>
+    <div id="MCQ" class="tabcontent">
+        <h3>Multiple Choice Questions</h3>
+        <textarea id="mcqText" oninput="liveCountMCQs()" placeholder="Paste your MCQ questions here..."></textarea>
         <p><strong>Questions in MCQ: <span id="mcqCounter">0</span></strong></p>
     </div>
 
     <!-- Essay Tab Content -->
     <div id="Essay" class="tabcontent">
         <h3>Essay Questions</h3>
-        <textarea id="essayText" placeholder="Paste your essay questions here..."></textarea>
+        <textarea id="essayText" oninput="liveCountEssay()" placeholder="Paste your Essay questions here..."></textarea>
         <p><strong>Questions in Essay: <span id="essayCounter">0</span></strong></p>
     </div>
 
     <!-- True/False Tab Content -->
     <div id="TrueFalse" class="tabcontent">
         <h3>True/False Questions</h3>
-        <textarea id="tfText" placeholder="Paste your True/False questions here..."></textarea>
+        <textarea id="tfText" oninput="liveCountTF()" placeholder="Paste your True/False questions here..."></textarea>
         <p><strong>Questions in True/False: <span id="tfCounter">0</span></strong></p>
     </div>
 
-    <!-- Matching Tab Content -->
-    <div id="Matching" class="tabcontent">
-        <h3>Matching Questions</h3>
-        <textarea id="matchingText" placeholder="Paste your Matching questions here..."></textarea>
-        <p><strong>Questions in Matching: <span id="matchingCounter">0</span></strong></p>
+    <!-- Fill in the Blank Tab Content -->
+    <div id="FIB" class="tabcontent">
+        <h3>Fill in the Blank Questions</h3>
+        <textarea id="fibText" oninput="liveCountFIB()" placeholder="Paste your FIB questions here..."></textarea>
+        <p><strong>Questions in FIB: <span id="fibCounter">0</span></strong></p>
     </div>
 
-    <!-- Numeric Response Tab Content -->
-    <div id="Numeric" class="tabcontent">
-        <h3>Numeric Response Questions</h3>
-        <textarea id="numericText" placeholder="Paste your Numeric Response questions here..."></textarea>
-        <p><strong>Questions in Numeric Response: <span id="numericCounter">0</span></strong></p>
+    <!-- Metadata Toggle -->
+    <div class="metadata-toggle">
+        <label>
+            <input type="checkbox" id="toggleMetadata" checked> My questions include metadata (Learning Outcome, Module, Difficulty)
+        </label>
     </div>
 
     <!-- Buttons -->
     <div class="button-container">
-        <button onclick="convertQuestions()">Convert</button>
+        <button onclick="convertQuestions()" title="Convert your questions to Blackboard format">Convert</button>
         <button onclick="downloadOutput()">Download as .txt</button>
     </div>
 

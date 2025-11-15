@@ -22,18 +22,37 @@ const QUESTION_TYPES = {
 const MAX_BATCH_SIZE = 250;
 
 // SEU Metadata Patterns - Specific patterns to preserve legitimate parentheses/brackets
-const METADATA_PATTERNS = {
-    LO: /\(LO\d+\)/gi,                    // Learning Outcome: (LO1), (LO2), etc.
-    CLO: /\(CLO\d+\)/gi,                   // Course Learning Outcome: (CLO1), etc.
-    MODULE: /\[Module\s+\d+\]/gi,          // Module: [Module 1], [Module 7], etc.
-    DIFFICULTY: /\[Difficulty\s+Level?:\s*(Low|Mid|High)\]/gi, // Difficulty (handles typo "Leve")
-    AUTHOR: /\([^)]*(?:Dr\.|La\.|Dr|Author)[^)]*\)/gi  // Author names containing Dr., La., etc.
-};
+// These patterns match metadata in both English and Arabic
+// Order matters: more specific patterns should be listed first
+const METADATA_PATTERNS = [
+    // Learning Outcomes (most specific first)
+    /\(LO\d+\)/gi,                    // Learning Outcome: (LO1), (LO2), etc.
+    /\(CLO\d+\)/gi,                   // Course Learning Outcome: (CLO1), etc.
+    
+    // Module patterns
+    /\[Module\s+\d+\]/gi,             // Module: [Module 1], [Module 7], etc.
+    /\[الوحدة\s+\d+\]/gi,              // Module in Arabic: [الوحدة 1], etc.
+    /\[Module\s*\d+\]/gi,              // Module without space: [Module1]
+    /\[الوحدة\s*\d+\]/gi,              // Module in Arabic without space: [الوحدة1]
+    
+    // Difficulty patterns
+    /\[Difficulty\s+Level?:\s*(Low|Mid|High)\]/gi, // Difficulty: [Difficulty Level: Low] (handles typo "Leve")
+    /\[مستوى\s+الصعوبة:\s*(منخفض|متوسط|عالي|Low|Mid|High)\]/gi, // Difficulty in Arabic
+    
+    // Author patterns (more specific)
+    /\([^)]*(?:Dr\.|La\.|Dr|Author|د\.|دكتور|المؤلف)[^)]*\)/gi,  // Author names (English and Arabic)
+    /\([^)]*Dr[^)]*\)/gi,              // Any parentheses containing "Dr"
+    /\([^)]*د[^)]*\)/gi,               // Any parentheses containing Arabic "د"
+    
+    // General metadata patterns (less specific, catch-all)
+    /\([^)]*(?:LO|CLO|Module|Difficulty|Level|Author)[^)]*\)/gi, // Any parentheses with metadata keywords
+    /\[[^\]]*(?:Module|Difficulty|Level|Author|وحدة|صعوبة|مستوى)[^\]]*\]/gi // Any brackets with metadata keywords
+];
 
 // Question Numbering Patterns
 const QUESTION_PATTERNS = {
     NUMBERED: /^\d+\.\s+/,                 // Numbered: "1. ", "19. "
-    LETTERED: /^[a-z]\)\s+/i              // Lettered: "a) ", "b) "
+    LETTERED: /^[a-z\u0600-\u06FF]\)\s+/i  // Lettered: "a) ", "ب) ", "أ) " (supports English and Arabic letters)
 };
 
 // ============================================================================
@@ -69,24 +88,36 @@ function showNotification(message, type = 'info', duration = 3000) {
 /**
  * Strips SEU metadata from text using specific patterns
  * Preserves legitimate parentheses and brackets in question text
+ * Metadata is ALWAYS removed from converted questions for Blackboard
  * @param {string} text - The text to process
  * @returns {string} - Text with metadata removed
  */
 function stripSEUMetadata(text) {
-    const includesMetadata = document.getElementById('toggleMetadata')?.checked ?? true;
-    
-    if (!includesMetadata) {
-        return text;
+    // Always strip metadata from converted questions (metadata should never appear in Blackboard output)
+    if (!text || typeof text !== 'string') {
+        return text || '';
     }
-
+    
     let cleaned = text;
 
     // Remove metadata patterns in order (most specific first)
-    Object.values(METADATA_PATTERNS).forEach(pattern => {
-        cleaned = cleaned.replace(pattern, '');
-    });
+    // Run multiple passes to catch nested or overlapping patterns
+    let previousLength = cleaned.length;
+    let iterations = 0;
+    const maxIterations = 5; // Prevent infinite loops
+    
+    do {
+        previousLength = cleaned.length;
+        
+        // Remove all metadata patterns (array order ensures specific patterns run first)
+        METADATA_PATTERNS.forEach(pattern => {
+            cleaned = cleaned.replace(pattern, '');
+        });
+        
+        iterations++;
+    } while (cleaned.length !== previousLength && iterations < maxIterations);
 
-    // Clean up extra spaces and trim
+    // Clean up extra spaces (multiple spaces, tabs, newlines) and trim
     cleaned = cleaned.replace(/\s+/g, ' ').trim();
     
     return cleaned;
@@ -145,26 +176,42 @@ function validateTabDelimited(text) {
  */
 function parseMCQ(text) {
     try {
-        let cleaned = stripSEUMetadata(text);
-        const lines = cleaned.split('\n').map(line => line.trim()).filter(line => line !== '');
+        // First, split into lines before processing to preserve structure
+        const rawLines = text.split('\n').map(line => line.trim()).filter(line => line !== '');
         
-        if (lines.length < 2) {
+        if (rawLines.length < 2) {
             throw new Error('MCQ must have at least a question and one choice');
         }
 
-        const { cleaned: question } = extractQuestionPrefix(lines[0]);
+        // Process the question line (first line)
+        let questionLine = rawLines[0];
+        // Strip metadata from question line only
+        questionLine = stripSEUMetadata(questionLine);
+        const { cleaned: question } = extractQuestionPrefix(questionLine);
         
-        if (!question) {
+        if (!question || question.trim() === '') {
             throw new Error('MCQ question text is required');
         }
 
+        // Process choices (remaining lines)
         const choices = [];
-        for (let i = 1; i < lines.length; i++) {
-            let choice = lines[i].replace(/^[a-z]\.\s*/i, '').trim();
-            const isCorrect = choice.includes('*');
+        for (let i = 1; i < rawLines.length; i++) {
+            let choiceLine = rawLines[i];
+            // Strip metadata from choice line
+            choiceLine = stripSEUMetadata(choiceLine);
+            
+            // Check for correct answer marker before processing
+            const isCorrect = choiceLine.includes('*');
+            
+            // Remove letter prefix (a., b., c., etc.) - case insensitive, supports both . and ) formats
+            // Pattern matches: "a.", "a)", "a ", "A.", etc.
+            let choice = choiceLine.replace(/^[a-z\u0600-\u06FF]\)?\s*\.?\s*/i, '').trim();
+            
+            // Remove asterisk
             choice = choice.replace(/\*/g, '').trim();
             
-            if (!choice) continue;
+            // Skip empty choices
+            if (!choice || choice === '') continue;
             
             choices.push({
                 text: choice,
@@ -263,20 +310,34 @@ function parseTrueFalse(text) {
  */
 function parseFillInBlank(text) {
     try {
-        let cleaned = stripSEUMetadata(text);
-        const lines = cleaned.split('\n').map(line => line.trim()).filter(line => line !== '');
+        // First, split into lines before processing to preserve structure
+        const rawLines = text.split('\n').map(line => line.trim()).filter(line => line !== '');
         
-        if (lines.length < 1) {
+        if (rawLines.length < 1) {
             throw new Error('Fill in the Blank question text is required');
         }
 
-        const { cleaned: question } = extractQuestionPrefix(lines[0]);
+        // Process the question line (first line)
+        let questionLine = rawLines[0];
+        // Strip metadata from question line only
+        questionLine = stripSEUMetadata(questionLine);
+        const { cleaned: question } = extractQuestionPrefix(questionLine);
         
-        if (!question) {
+        if (!question || question.trim() === '') {
             throw new Error('Fill in the Blank question text is required');
         }
 
-        const answers = lines.slice(1).filter(answer => answer !== '');
+        // Process answers (remaining lines)
+        const answers = [];
+        for (let i = 1; i < rawLines.length; i++) {
+            let answerLine = rawLines[i];
+            // Strip metadata from answer line
+            answerLine = stripSEUMetadata(answerLine);
+            // Trim and skip empty answers
+            if (answerLine && answerLine.trim() !== '') {
+                answers.push(answerLine.trim());
+            }
+        }
         
         if (answers.length === 0) {
             throw new Error('Fill in the Blank must have at least one answer');
@@ -302,26 +363,42 @@ function parseFillInBlank(text) {
  */
 function parseMultipleAnswer(text) {
     try {
-        let cleaned = stripSEUMetadata(text);
-        const lines = cleaned.split('\n').map(line => line.trim()).filter(line => line !== '');
+        // First, split into lines before processing to preserve structure
+        const rawLines = text.split('\n').map(line => line.trim()).filter(line => line !== '');
         
-        if (lines.length < 2) {
+        if (rawLines.length < 2) {
             throw new Error('Multiple Answer must have at least a question and one choice');
         }
 
-        const { cleaned: question } = extractQuestionPrefix(lines[0]);
+        // Process the question line (first line)
+        let questionLine = rawLines[0];
+        // Strip metadata from question line only
+        questionLine = stripSEUMetadata(questionLine);
+        const { cleaned: question } = extractQuestionPrefix(questionLine);
         
-        if (!question) {
+        if (!question || question.trim() === '') {
             throw new Error('Multiple Answer question text is required');
         }
 
+        // Process choices (remaining lines)
         const choices = [];
-        for (let i = 1; i < lines.length; i++) {
-            let choice = lines[i].replace(/^[a-z]\.\s*/i, '').trim();
-            const isCorrect = choice.includes('*');
+        for (let i = 1; i < rawLines.length; i++) {
+            let choiceLine = rawLines[i];
+            // Strip metadata from choice line
+            choiceLine = stripSEUMetadata(choiceLine);
+            
+            // Check for correct answer marker before processing
+            const isCorrect = choiceLine.includes('*');
+            
+            // Remove letter prefix (a., b., c., etc.) - case insensitive, supports both . and ) formats
+            // Pattern matches: "a.", "a)", "a ", "A.", etc.
+            let choice = choiceLine.replace(/^[a-z\u0600-\u06FF]\)?\s*\.?\s*/i, '').trim();
+            
+            // Remove asterisk
             choice = choice.replace(/\*/g, '').trim();
             
-            if (!choice) continue;
+            // Skip empty choices
+            if (!choice || choice === '') continue;
             
             choices.push({
                 text: choice,
@@ -405,23 +482,36 @@ function parseMatching(text) {
  */
 function parseNumericResponse(text) {
     try {
-        let cleaned = stripSEUMetadata(text);
-        const lines = cleaned.split('\n').map(line => line.trim()).filter(line => line !== '');
+        // First, split into lines before processing to preserve structure
+        const rawLines = text.split('\n').map(line => line.trim()).filter(line => line !== '');
         
-        if (lines.length < 1) {
+        if (rawLines.length < 1) {
             throw new Error('Numeric Response question text is required');
         }
 
-        const { cleaned: question } = extractQuestionPrefix(lines[0]);
+        // Process the question line (first line)
+        let questionLine = rawLines[0];
+        // Strip metadata from question line only
+        questionLine = stripSEUMetadata(questionLine);
+        const { cleaned: question } = extractQuestionPrefix(questionLine);
         
-        if (!question) {
+        if (!question || question.trim() === '') {
             throw new Error('Numeric Response question text is required');
         }
 
-        const answer = lines[1] || '';
-        const tolerance = lines[2] || '';
+        // Process answer (second line, if exists)
+        let answer = '';
+        if (rawLines.length > 1) {
+            answer = stripSEUMetadata(rawLines[1]).trim();
+        }
 
-        if (!answer) {
+        // Process tolerance (third line, if exists)
+        let tolerance = '';
+        if (rawLines.length > 2) {
+            tolerance = stripSEUMetadata(rawLines[2]).trim();
+        }
+
+        if (!answer || answer === '') {
             throw new Error('Numeric Response must have an answer');
         }
 
@@ -505,7 +595,7 @@ function updateTotalQuestions() {
  * Includes validation and error handling
  */
 function convertQuestions() {
-    const outputText = document.getElementById('outputText');
+  const outputText = document.getElementById('outputText');
     if (!outputText) return;
 
     // Show loading state
@@ -517,36 +607,47 @@ function convertQuestions() {
     }
 
     try {
-        let convertedText = '';
+  let convertedText = '';
         const errors = [];
         let totalQuestions = 0;
 
         // Process MCQ
         const mcqText = document.getElementById('mcqText')?.value || '';
-        if (mcqText.trim() !== '') {
-            const mcqQuestions = mcqText.split(/\n(?=\d+\.\s+)/).filter(block => block.trim() !== '');
+  if (mcqText.trim() !== '') {
+            // Split by numbered questions, but also handle cases where first question might not have number
+            let mcqQuestions = mcqText.split(/\n(?=\d+\.\s+)/).filter(block => block.trim() !== '');
+            
+            // If no numbered questions found, treat entire text as one question
+            if (mcqQuestions.length === 0 && mcqText.trim() !== '') {
+                mcqQuestions = [mcqText.trim()];
+            }
+            
             const convertedMCQ = [];
             
             mcqQuestions.forEach((block, index) => {
                 try {
-                    convertedMCQ.push(parseMCQ(block));
-                    totalQuestions++;
+                    // Trim the block to remove any leading/trailing whitespace
+                    const trimmedBlock = block.trim();
+                    if (trimmedBlock) {
+                        convertedMCQ.push(parseMCQ(trimmedBlock));
+                        totalQuestions++;
+                    }
                 } catch (error) {
                     errors.push(`MCQ Question ${index + 1}: ${error.message}`);
                 }
             });
             
             if (convertedMCQ.length > 0) {
-                convertedText += convertedMCQ.join('\n');
+    convertedText += convertedMCQ.join('\n');
             }
             updateQuestionCounter('mcq');
-        }
+  }
 
         // Process Essay (supports both numbered and lettered)
         const essayText = document.getElementById('essayText')?.value || '';
-        if (essayText.trim() !== '') {
-            // Split by both numbered and lettered patterns
-            const essayQuestions = essayText.split(/\n(?=\d+\.\s+|[a-z]\)\s+)/i).filter(block => block.trim() !== '');
+  if (essayText.trim() !== '') {
+            // Split by both numbered and lettered patterns (supports English and Arabic letters)
+            const essayQuestions = essayText.split(/\n(?=\d+\.\s+|[a-z\u0600-\u06FF]\)\s+)/i).filter(block => block.trim() !== '');
             const convertedEssay = [];
             
             essayQuestions.forEach((block, index) => {
@@ -566,7 +667,7 @@ function convertQuestions() {
 
         // Process True/False
         const tfText = document.getElementById('tfText')?.value || '';
-        if (tfText.trim() !== '') {
+  if (tfText.trim() !== '') {
             const tfQuestions = tfText.split(/\n(?=\d+\.\s+)/).filter(block => block.trim() !== '');
             const convertedTF = [];
             
@@ -587,7 +688,7 @@ function convertQuestions() {
 
         // Process Fill in the Blank
         const fibText = document.getElementById('fibText')?.value || '';
-        if (fibText.trim() !== '') {
+  if (fibText.trim() !== '') {
             const fibQuestions = fibText.split(/\n(?=\d+\.\s+)/).filter(block => block.trim() !== '');
             const convertedFIB = [];
             
@@ -680,7 +781,7 @@ function convertQuestions() {
         }
 
         // Set output
-        outputText.value = convertedText.trim();
+  outputText.value = convertedText.trim();
 
         // Show results
         if (errors.length > 0) {
@@ -734,11 +835,11 @@ function downloadOutput() {
         // Create blob and download
         const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
         const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
+  const link = document.createElement('a');
         link.href = url;
-        link.download = 'blackboard_questions.txt';
+  link.download = 'blackboard_questions.txt';
         document.body.appendChild(link);
-        link.click();
+  link.click();
         document.body.removeChild(link);
 
         // Clean up blob URL
@@ -825,11 +926,12 @@ function openTab(evt, tabName) {
         tabcontent[i].setAttribute('aria-hidden', 'true');
     }
     
-    // Remove active class from all tab links
+    // Remove active class from all tab links (both sidebar and top nav)
     tablinks = document.getElementsByClassName('tablinks');
     for (i = 0; i < tablinks.length; i++) {
         tablinks[i].classList.remove('active');
         tablinks[i].setAttribute('aria-selected', 'false');
+        tablinks[i].setAttribute('tabindex', '-1');
     }
     
     // Show the selected tab content
@@ -839,10 +941,21 @@ function openTab(evt, tabName) {
         selectedTab.setAttribute('aria-hidden', 'false');
     }
     
-    // Add active class to the clicked tab link
+    // Add active class to the clicked tab link and corresponding link in other nav
     if (evt && evt.currentTarget) {
         evt.currentTarget.classList.add('active');
         evt.currentTarget.setAttribute('aria-selected', 'true');
+        evt.currentTarget.setAttribute('tabindex', '0');
+        
+        // Also update the corresponding link in the other navigation (sidebar or top nav)
+        const allLinks = document.querySelectorAll(`[aria-controls="${tabName}"]`);
+        allLinks.forEach(link => {
+            if (link !== evt.currentTarget) {
+                link.classList.add('active');
+                link.setAttribute('aria-selected', 'true');
+                link.setAttribute('tabindex', '0');
+            }
+        });
     }
 }
 
@@ -894,6 +1007,38 @@ function handleTabKeyboard(evt) {
  * Initializes the application
  */
 function initializeApp() {
+    // Initialize theme
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    document.body.className = currentTheme + '-theme';
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.querySelector('.icon').textContent = currentTheme === 'light' ? '🌙' : '☀️';
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.body.classList.contains('dark-theme');
+            if (isDark) {
+                document.body.classList.remove('dark-theme');
+                document.body.classList.add('light-theme');
+                themeToggle.querySelector('.icon').textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.body.classList.remove('light-theme');
+                document.body.classList.add('dark-theme');
+                themeToggle.querySelector('.icon').textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+    }
+
+    // Initialize language switcher
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const lang = btn.dataset.lang;
+            if (window.setLanguage) {
+                window.setLanguage(lang);
+            }
+        });
+    });
+
     // Open first tab by default
     const firstTab = document.querySelector('.tablinks');
     if (firstTab) {
@@ -916,6 +1061,37 @@ function initializeApp() {
 
     // Initialize counters
     updateTotalQuestions();
+}
+
+/**
+ * Toggles example visibility
+ * @param {string} exampleId - The ID of the example element to toggle
+ */
+function toggleExample(exampleId) {
+    const example = document.getElementById(exampleId);
+    const button = document.querySelector(`[aria-controls="${exampleId}"]`);
+    
+    if (!example || !button) return;
+    
+    const isExpanded = example.classList.contains('expanded');
+    
+    if (isExpanded) {
+        example.classList.remove('expanded');
+        if (window.t) {
+            button.textContent = window.t('showExample');
+        } else {
+            button.textContent = 'Show Example';
+        }
+        button.setAttribute('aria-expanded', 'false');
+    } else {
+        example.classList.add('expanded');
+        if (window.t) {
+            button.textContent = window.t('hideExample');
+        } else {
+            button.textContent = 'Hide Example';
+        }
+        button.setAttribute('aria-expanded', 'true');
+    }
 }
 
 // Initialize when DOM is ready

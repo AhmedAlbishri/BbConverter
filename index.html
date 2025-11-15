@@ -4,18 +4,122 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Convert SEU-formatted exam questions to Blackboard Ultra tab-delimited format">
-    <title>Blackboard Question Converter</title>
+    <title>Blackboard Question Converter - SEU</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="js/translations.js"></script>
 </head>
-<body>
-<div class="container">
-    <header>
-        <h1>Blackboard Question Converter</h1>
-        <p class="subtitle">Convert SEU-formatted questions to Blackboard Ultra format</p>
+<body class="light-theme">
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo-section">
+                    <h1 class="logo" data-i18n="appTitle">Blackboard Question Converter</h1>
+                    <p class="logo-subtitle" data-i18n="deanshipName">E-Learning Deanship</p>
+                </div>
+                <div class="header-controls">
+                    <button class="btn-icon" id="themeToggle" aria-label="Toggle theme">
+                        <span class="icon">🌙</span>
+                    </button>
+                    <div class="language-switcher">
+                        <button class="lang-btn active" data-lang="en">EN</button>
+                        <button class="lang-btn" data-lang="ar">العربية</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </header>
 
-    <!-- Navigation Bar with ARIA -->
-    <nav>
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Left Sidebar Navigation -->
+            <aside class="sidebar-nav" role="navigation" aria-label="Question type navigation">
+                <ul role="tablist" aria-label="Question type tabs">
+                    <li role="presentation">
+                        <a class="tablinks active" 
+                           href="javascript:void(0)" 
+                           role="tab" 
+                           aria-selected="true"
+                           aria-controls="MCQ"
+                           tabindex="0"
+                           onclick="openTab(event, 'MCQ')"
+                           onkeydown="if(event.key==='Enter'||event.key===' ') {event.preventDefault(); openTab(event, 'MCQ');}"
+                           data-i18n="mcqTab">MCQ</a>
+                    </li>
+                    <li role="presentation">
+                        <a class="tablinks" 
+                           href="javascript:void(0)" 
+                           role="tab" 
+                           aria-selected="false"
+                           aria-controls="Essay"
+                           tabindex="-1"
+                           onclick="openTab(event, 'Essay')"
+                           onkeydown="if(event.key==='Enter'||event.key===' ') {event.preventDefault(); openTab(event, 'Essay');}"
+                           data-i18n="essayTab">Essay</a>
+                    </li>
+                    <li role="presentation">
+                        <a class="tablinks" 
+                           href="javascript:void(0)" 
+                           role="tab" 
+                           aria-selected="false"
+                           aria-controls="TrueFalse"
+                           tabindex="-1"
+                           onclick="openTab(event, 'TrueFalse')"
+                           onkeydown="if(event.key==='Enter'||event.key===' ') {event.preventDefault(); openTab(event, 'TrueFalse');}"
+                           data-i18n="trueFalseTab">True/False</a>
+                    </li>
+                    <li role="presentation">
+                        <a class="tablinks" 
+                           href="javascript:void(0)" 
+                           role="tab" 
+                           aria-selected="false"
+                           aria-controls="FIB"
+                           tabindex="-1"
+                           onclick="openTab(event, 'FIB')"
+                           onkeydown="if(event.key==='Enter'||event.key===' ') {event.preventDefault(); openTab(event, 'FIB');}"
+                           data-i18n="fillBlankTab">Fill in the Blank</a>
+                    </li>
+                    <li role="presentation">
+                        <a class="tablinks" 
+                           href="javascript:void(0)" 
+                           role="tab" 
+                           aria-selected="false"
+                           aria-controls="MA"
+                           tabindex="-1"
+                           onclick="openTab(event, 'MA')"
+                           onkeydown="if(event.key==='Enter'||event.key===' ') {event.preventDefault(); openTab(event, 'MA');}"
+                           data-i18n="multipleAnswerTab">Multiple Answer</a>
+                    </li>
+                    <li role="presentation" style="display: none;">
+                        <a class="tablinks" 
+                           href="javascript:void(0)" 
+                           role="tab" 
+                           aria-selected="false"
+                           aria-controls="MAT"
+                           tabindex="-1"
+                           onclick="openTab(event, 'MAT')"
+                           onkeydown="if(event.key==='Enter'||event.key===' ') {event.preventDefault(); openTab(event, 'MAT');}"
+                           data-i18n="matchingTab">Matching</a>
+                    </li>
+                    <li role="presentation">
+                        <a class="tablinks" 
+                           href="javascript:void(0)" 
+                           role="tab" 
+                           aria-selected="false"
+                           aria-controls="NUM"
+                           tabindex="-1"
+                           onclick="openTab(event, 'NUM')"
+                           onkeydown="if(event.key==='Enter'||event.key===' ') {event.preventDefault(); openTab(event, 'NUM');}"
+                           data-i18n="numericTab">Numeric</a>
+                    </li>
+                </ul>
+            </aside>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <!-- Navigation Bar with ARIA (fallback for mobile) -->
+                <nav>
         <ul role="tablist" aria-label="Question type tabs">
             <li role="presentation">
                 <a class="tablinks active" 
@@ -25,7 +129,8 @@
                    aria-controls="MCQ"
                    tabindex="0"
                    onclick="openTab(event, 'MCQ')"
-                   onkeydown="if(event.key==='Enter'||event.key===' ') {event.preventDefault(); openTab(event, 'MCQ');}">MCQ</a>
+                   onkeydown="if(event.key==='Enter'||event.key===' ') {event.preventDefault(); openTab(event, 'MCQ');}"
+                   data-i18n="mcqTab">MCQ</a>
             </li>
             <li role="presentation">
                 <a class="tablinks" 
@@ -35,7 +140,8 @@
                    aria-controls="Essay"
                    tabindex="-1"
                    onclick="openTab(event, 'Essay')"
-                   onkeydown="if(event.key==='Enter'||event.key===' ') {event.preventDefault(); openTab(event, 'Essay');}">Essay</a>
+                   onkeydown="if(event.key==='Enter'||event.key===' ') {event.preventDefault(); openTab(event, 'Essay');}"
+                   data-i18n="essayTab">Essay</a>
             </li>
             <li role="presentation">
                 <a class="tablinks" 
@@ -45,7 +151,8 @@
                    aria-controls="TrueFalse"
                    tabindex="-1"
                    onclick="openTab(event, 'TrueFalse')"
-                   onkeydown="if(event.key==='Enter'||event.key===' ') {event.preventDefault(); openTab(event, 'TrueFalse');}">True/False</a>
+                   onkeydown="if(event.key==='Enter'||event.key===' ') {event.preventDefault(); openTab(event, 'TrueFalse');}"
+                   data-i18n="trueFalseTab">True/False</a>
             </li>
             <li role="presentation">
                 <a class="tablinks" 
@@ -55,7 +162,8 @@
                    aria-controls="FIB"
                    tabindex="-1"
                    onclick="openTab(event, 'FIB')"
-                   onkeydown="if(event.key==='Enter'||event.key===' ') {event.preventDefault(); openTab(event, 'FIB');}">Fill in the Blank</a>
+                   onkeydown="if(event.key==='Enter'||event.key===' ') {event.preventDefault(); openTab(event, 'FIB');}"
+                   data-i18n="fillBlankTab">Fill in the Blank</a>
             </li>
             <li role="presentation">
                 <a class="tablinks" 
@@ -65,9 +173,10 @@
                    aria-controls="MA"
                    tabindex="-1"
                    onclick="openTab(event, 'MA')"
-                   onkeydown="if(event.key==='Enter'||event.key===' ') {event.preventDefault(); openTab(event, 'MA');}">Multiple Answer</a>
+                   onkeydown="if(event.key==='Enter'||event.key===' ') {event.preventDefault(); openTab(event, 'MA');}"
+                   data-i18n="multipleAnswerTab">Multiple Answer</a>
             </li>
-            <li role="presentation">
+            <li role="presentation" style="display: none;">
                 <a class="tablinks" 
                    href="javascript:void(0)" 
                    role="tab" 
@@ -75,7 +184,8 @@
                    aria-controls="MAT"
                    tabindex="-1"
                    onclick="openTab(event, 'MAT')"
-                   onkeydown="if(event.key==='Enter'||event.key===' ') {event.preventDefault(); openTab(event, 'MAT');}">Matching</a>
+                   onkeydown="if(event.key==='Enter'||event.key===' ') {event.preventDefault(); openTab(event, 'MAT');}"
+                   data-i18n="matchingTab">Matching</a>
             </li>
             <li role="presentation">
                 <a class="tablinks" 
@@ -85,16 +195,18 @@
                    aria-controls="NUM"
                    tabindex="-1"
                    onclick="openTab(event, 'NUM')"
-                   onkeydown="if(event.key==='Enter'||event.key===' ') {event.preventDefault(); openTab(event, 'NUM');}">Numeric</a>
+                   onkeydown="if(event.key==='Enter'||event.key===' ') {event.preventDefault(); openTab(event, 'NUM');}"
+                   data-i18n="numericTab">Numeric</a>
             </li>
         </ul>
     </nav>
 
     <!-- MCQ Tab Content -->
     <div id="MCQ" class="tabcontent" role="tabpanel" aria-labelledby="MCQ-tab" aria-hidden="false">
-        <h2>Multiple Choice Questions</h2>
-        <p class="help-text">Format: Numbered question with choices marked with letters. Use * to mark the correct answer.</p>
-        <p class="example-text">Example: 1. Which of these is NOT a step? (LO1) (Dr. Name) [Module 1] [Difficulty Level: Low]<br>
+        <h2 data-i18n="multipleChoice">Multiple Choice Questions</h2>
+        <p class="help-text"><span data-i18n="format">Format</span>: <span data-i18n="mcqFormat">Numbered question with choices marked with letters. Use * to mark the correct answer.</span></p>
+        <button class="example-toggle" onclick="toggleExample('mcq-example')" aria-expanded="false" aria-controls="mcq-example" data-i18n="showExample">Show Example</button>
+        <p id="mcq-example" class="example-text">Example: 1. Which of these is NOT a step? (LO1) (Dr. Name) [Module 1] [Difficulty Level: Low]<br>
         a. Choice one<br>
         b. Choice two*<br>
         c. Choice three</p>
@@ -103,27 +215,29 @@
                   placeholder="1. Your question here (LO1) (Author) [Module 1] [Difficulty Level: Low]&#10;a. First choice&#10;b. Second choice*&#10;c. Third choice"
                   aria-label="Multiple Choice Questions input"
                   aria-describedby="mcq-help"></textarea>
-        <p id="mcq-help"><strong>Questions in MCQ: <span id="mcqCounter" aria-live="polite">0</span></strong></p>
+        <p id="mcq-help"><strong><span data-i18n="questionsIn">Questions in</span> <span data-i18n="mcqTab">MCQ</span>: <span id="mcqCounter" aria-live="polite">0</span></strong></p>
     </div>
 
     <!-- Essay Tab Content -->
     <div id="Essay" class="tabcontent" role="tabpanel" aria-labelledby="Essay-tab" aria-hidden="true">
-        <h2>Essay Questions</h2>
-        <p class="help-text">Format: Numbered (1.) or lettered (a)) question format. Both are supported.</p>
-        <p class="example-text">Example: a) What is the similarity? (LO2) (Dr. Name) [Module 1] [Difficulty Level: Low]</p>
+        <h2 data-i18n="essay">Essay Questions</h2>
+        <p class="help-text"><span data-i18n="format">Format</span>: <span data-i18n="essayFormat">Numbered (1.) or lettered (a)) question format. Both are supported.</span></p>
+        <button class="example-toggle" onclick="toggleExample('essay-example')" aria-expanded="false" aria-controls="essay-example" data-i18n="showExample">Show Example</button>
+        <p id="essay-example" class="example-text">Example: a) What is the similarity and difference between interval data and ratio data? (LO2) (Dr. Name) [Module 1] [Difficulty Level: Low]</p>
         <textarea id="essayText" 
                   oninput="updateQuestionCounter('essay'); updateTotalQuestions();" 
                   placeholder="a) Your essay question here (LO2) (Author) [Module 1] [Difficulty Level: Low]"
                   aria-label="Essay Questions input"
                   aria-describedby="essay-help"></textarea>
-        <p id="essay-help"><strong>Questions in Essay: <span id="essayCounter" aria-live="polite">0</span></strong></p>
+        <p id="essay-help"><strong><span data-i18n="questionsIn">Questions in</span> <span data-i18n="essayTab">Essay</span>: <span id="essayCounter" aria-live="polite">0</span></strong></p>
     </div>
 
     <!-- True/False Tab Content -->
     <div id="TrueFalse" class="tabcontent" role="tabpanel" aria-labelledby="TrueFalse-tab" aria-hidden="true">
-        <h2>True/False Questions</h2>
-        <p class="help-text">Format: Numbered question with True/False options. Use * to mark the correct answer.</p>
-        <p class="example-text">Example: 1. This statement is true. (LO1) [Module 1]<br>
+        <h2 data-i18n="trueFalse">True/False Questions</h2>
+        <p class="help-text"><span data-i18n="format">Format</span>: <span data-i18n="tfFormat">Numbered question with True/False options. Use * to mark the correct answer.</span></p>
+        <button class="example-toggle" onclick="toggleExample('tf-example')" aria-expanded="false" aria-controls="tf-example" data-i18n="showExample">Show Example</button>
+        <p id="tf-example" class="example-text">Example: 1. This statement is true. (LO1) (Dr. Name) [Module 1] [Difficulty Level: Low]<br>
         True*<br>
         False</p>
         <textarea id="tfText" 
@@ -131,14 +245,15 @@
                   placeholder="1. Your true/false question here (LO1) (Author) [Module 1] [Difficulty Level: Low]&#10;True*&#10;False"
                   aria-label="True/False Questions input"
                   aria-describedby="tf-help"></textarea>
-        <p id="tf-help"><strong>Questions in True/False: <span id="tfCounter" aria-live="polite">0</span></strong></p>
+        <p id="tf-help"><strong><span data-i18n="questionsIn">Questions in</span> <span data-i18n="trueFalseTab">True/False</span>: <span id="tfCounter" aria-live="polite">0</span></strong></p>
     </div>
 
     <!-- Fill in the Blank Tab Content -->
     <div id="FIB" class="tabcontent" role="tabpanel" aria-labelledby="FIB-tab" aria-hidden="true">
-        <h2>Fill in the Blank Questions</h2>
-        <p class="help-text">Format: Numbered question with answers on subsequent lines.</p>
-        <p class="example-text">Example: 1. The capital of France is ____. (LO1) [Module 1]<br>
+        <h2 data-i18n="fillBlank">Fill in the Blank Questions</h2>
+        <p class="help-text"><span data-i18n="format">Format</span>: <span data-i18n="fibFormat">Numbered question with answers on subsequent lines.</span></p>
+        <button class="example-toggle" onclick="toggleExample('fib-example')" aria-expanded="false" aria-controls="fib-example" data-i18n="showExample">Show Example</button>
+        <p id="fib-example" class="example-text">Example: 1. The capital of France is ____. (LO1) (Dr. Name) [Module 1] [Difficulty Level: Low]<br>
         Paris<br>
         paris</p>
         <textarea id="fibText" 
@@ -146,14 +261,15 @@
                   placeholder="1. Your fill-in-the-blank question here (LO1) (Author) [Module 1] [Difficulty Level: Low]&#10;Answer 1&#10;Answer 2"
                   aria-label="Fill in the Blank Questions input"
                   aria-describedby="fib-help"></textarea>
-        <p id="fib-help"><strong>Questions in FIB: <span id="fibCounter" aria-live="polite">0</span></strong></p>
+        <p id="fib-help"><strong><span data-i18n="questionsIn">Questions in</span> <span data-i18n="fillBlankTab">FIB</span>: <span id="fibCounter" aria-live="polite">0</span></strong></p>
     </div>
 
     <!-- Multiple Answer Tab Content -->
     <div id="MA" class="tabcontent" role="tabpanel" aria-labelledby="MA-tab" aria-hidden="true">
-        <h2>Multiple Answer Questions</h2>
-        <p class="help-text">Format: Similar to MCQ but allows multiple correct answers. Mark all correct answers with *.</p>
-        <p class="example-text">Example: 1. Select all that apply. (LO1) [Module 1]<br>
+        <h2 data-i18n="multipleAnswer">Multiple Answer Questions</h2>
+        <p class="help-text"><span data-i18n="format">Format</span>: <span data-i18n="maFormat">Similar to MCQ but allows multiple correct answers. Mark all correct answers with *.</span></p>
+        <button class="example-toggle" onclick="toggleExample('ma-example')" aria-expanded="false" aria-controls="ma-example" data-i18n="showExample">Show Example</button>
+        <p id="ma-example" class="example-text">Example: 1. Select all that apply. (LO1) (Dr. Name) [Module 1] [Difficulty Level: Low]<br>
         a. Option one*<br>
         b. Option two*<br>
         c. Option three</p>
@@ -162,14 +278,15 @@
                   placeholder="1. Your multiple answer question here (LO1) (Author) [Module 1] [Difficulty Level: Low]&#10;a. First option*&#10;b. Second option*&#10;c. Third option"
                   aria-label="Multiple Answer Questions input"
                   aria-describedby="ma-help"></textarea>
-        <p id="ma-help"><strong>Questions in Multiple Answer: <span id="maCounter" aria-live="polite">0</span></strong></p>
+        <p id="ma-help"><strong><span data-i18n="questionsIn">Questions in</span> <span data-i18n="multipleAnswerTab">Multiple Answer</span>: <span id="maCounter" aria-live="polite">0</span></strong></p>
     </div>
 
     <!-- Matching Tab Content -->
     <div id="MAT" class="tabcontent" role="tabpanel" aria-labelledby="MAT-tab" aria-hidden="true">
         <h2>Matching Questions</h2>
         <p class="help-text">Format: Numbered question with answer-matching pairs on subsequent lines.</p>
-        <p class="example-text">Example: 1. Match the following. (LO1) [Module 1]<br>
+        <button class="example-toggle" onclick="toggleExample('mat-example')" aria-expanded="false" aria-controls="mat-example" data-i18n="showExample">Show Example</button>
+        <p id="mat-example" class="example-text">Example: 1. Match the following. (LO1) (Dr. Name) [Module 1] [Difficulty Level: Low]<br>
         Paris France<br>
         London England</p>
         <textarea id="matText" 
@@ -177,14 +294,15 @@
                   placeholder="1. Your matching question here (LO1) (Author) [Module 1] [Difficulty Level: Low]&#10;Answer1 Matching1&#10;Answer2 Matching2"
                   aria-label="Matching Questions input"
                   aria-describedby="mat-help"></textarea>
-        <p id="mat-help"><strong>Questions in Matching: <span id="matCounter" aria-live="polite">0</span></strong></p>
+        <p id="mat-help"><strong><span data-i18n="questionsIn">Questions in</span> <span data-i18n="matchingTab">Matching</span>: <span id="matCounter" aria-live="polite">0</span></strong></p>
     </div>
 
     <!-- Numeric Response Tab Content -->
     <div id="NUM" class="tabcontent" role="tabpanel" aria-labelledby="NUM-tab" aria-hidden="true">
-        <h2>Numeric Response Questions</h2>
-        <p class="help-text">Format: Numbered question with numeric answer. Optional tolerance on third line.</p>
-        <p class="example-text">Example: 1. What is 2+2? (LO1) [Module 1]<br>
+        <h2 data-i18n="numeric">Numeric Response Questions</h2>
+        <p class="help-text"><span data-i18n="format">Format</span>: <span data-i18n="numFormat">Numbered question with numeric answer. Optional tolerance on third line.</span></p>
+        <button class="example-toggle" onclick="toggleExample('num-example')" aria-expanded="false" aria-controls="num-example" data-i18n="showExample">Show Example</button>
+        <p id="num-example" class="example-text">Example: 1. What is 2+2? (LO1) (Dr. Name) [Module 1] [Difficulty Level: Low]<br>
         4<br>
         0.5</p>
         <textarea id="numText" 
@@ -192,51 +310,39 @@
                   placeholder="1. Your numeric question here (LO1) (Author) [Module 1] [Difficulty Level: Low]&#10;42&#10;0.5"
                   aria-label="Numeric Response Questions input"
                   aria-describedby="num-help"></textarea>
-        <p id="num-help"><strong>Questions in Numeric: <span id="numCounter" aria-live="polite">0</span></strong></p>
+        <p id="num-help"><strong><span data-i18n="questionsIn">Questions in</span> <span data-i18n="numericTab">Numeric</span>: <span id="numCounter" aria-live="polite">0</span></strong></p>
     </div>
 
-    <!-- Metadata Toggle -->
-    <div class="metadata-toggle">
-        <label for="toggleMetadata">
-            <input type="checkbox" 
-                   id="toggleMetadata" 
-                   checked 
-                   aria-describedby="metadata-help"> 
-            My questions include metadata (Learning Outcome, Module, Difficulty)
-        </label>
-        <p id="metadata-help" class="help-text-small">When checked, metadata patterns like (LO1), (Author), [Module 1], and [Difficulty Level: Low] will be automatically removed from questions.</p>
+    <!-- Privacy Notice -->
+    <div class="privacy-notice">
+        <div class="privacy-icon" aria-hidden="true">ℹ️</div>
+        <div class="privacy-content">
+            <strong data-i18n="privacyMessage">Privacy Notice</strong>
+            <p class="help-text-small" data-i18n="privacyText">This website does not store, upload, or transmit your questions. All processing happens locally in your browser.</p>
+        </div>
     </div>
 
     <!-- Buttons -->
     <div class="button-container">
         <button onclick="convertQuestions()" 
                 title="Convert your questions to Blackboard format (Ctrl+Enter)"
-                aria-label="Convert questions to Blackboard format">
-            Convert
-        </button>
+                aria-label="Convert questions to Blackboard format"
+                data-i18n="convert">Convert</button>
         <button onclick="downloadOutput()" 
                 class="success"
                 title="Download converted questions as .txt file"
-                aria-label="Download converted questions">
-            Download as .txt
-        </button>
-        <button onclick="copyToClipboard()" 
-                class="secondary"
-                title="Copy output to clipboard"
-                aria-label="Copy output to clipboard">
-            Copy to Clipboard
-        </button>
+                aria-label="Download converted questions"
+                data-i18n="download">Download as .txt</button>
         <button onclick="clearAll()" 
                 class="secondary"
                 title="Clear all input fields and output"
-                aria-label="Clear all fields">
-            Clear All
-        </button>
+                aria-label="Clear all fields"
+                data-i18n="clearAll">Clear All</button>
     </div>
 
     <!-- Display the total number of questions -->
     <p aria-live="polite" aria-atomic="true">
-        <strong>Total Questions: <span id="totalQuestions">0</span></strong>
+        <strong><span data-i18n="totalQuestions">Total Questions</span>: <span id="totalQuestions">0</span></strong>
     </p>
 
     <!-- Output Textarea -->
@@ -246,14 +352,32 @@
               readonly
               aria-label="Converted Blackboard questions output"
               aria-describedby="output-help"></textarea>
-    <p id="output-help" class="help-text-small">This output is in Blackboard Ultra tab-delimited format and ready for upload.</p>
+    <p id="output-help" class="help-text-small" data-i18n="outputHelp">This output is in Blackboard Ultra tab-delimited format and ready for upload.</p>
+            </div>
+        </div>
+    </main>
 
-</div>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p data-i18n="footerText">© 2025 Saudi Electronic University - E-Learning Deanship - Blackboard Question Converter. All rights reserved.</p>
+            <div class="footer-developer">
+                <p data-i18n="developedBy">Developed by</p>
+                <div class="developer-links">
+                    <a href="https://ahmedalbishri.com/" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="Website">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM18.92 8h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2 0 .68.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56-1.84-.63-3.37-1.9-4.33-3.56zm2.95-8H5.08c.96-1.66 2.49-2.93 4.33-3.56C8.81 5.55 8.35 6.75 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2 0-.68.07-1.34.16-2h4.68c.09.66.16 1.32.16 2 0 .68-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95c-.96 1.65-2.49 2.93-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2 0-.68-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
 
-<!-- Screen reader only text -->
-<div class="sr-only" aria-live="polite" aria-atomic="true" id="aria-live-region"></div>
+    <!-- Screen reader only text -->
+    <div class="sr-only" aria-live="polite" aria-atomic="true" id="aria-live-region"></div>
 
-<!-- Link to external JS file -->
-<script src="script.js"></script>
+    <!-- Link to external JS file -->
+    <script src="script.js"></script>
 </body>
 </html>

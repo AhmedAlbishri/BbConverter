@@ -165,11 +165,17 @@ body {
 
 [dir="rtl"] .header-content {
     flex-direction: row-reverse;
+    direction: rtl;
 }
 
 [dir="rtl"] .logo-section {
     text-align: right;
     align-items: flex-end;
+    order: 2;
+}
+
+[dir="rtl"] .header-controls {
+    order: 1;
 }
 
 [dir="rtl"] .sidebar-nav ul li a {
@@ -611,8 +617,8 @@ button.success:hover {
     background: linear-gradient(135deg, #059669 0%, #10b981 100%);
 }
 
-/* Privacy Notice */
-.privacy-notice {
+/* Information Notice (Combined Tip & Privacy) */
+.info-notice {
     margin: 15px 0;
     padding: 12px 15px;
     background: var(--bg-tertiary);
@@ -623,25 +629,33 @@ button.success:hover {
     gap: 12px;
 }
 
-.privacy-icon {
+.info-icon {
     font-size: 1.2rem;
     flex-shrink: 0;
     margin-top: 2px;
 }
 
-.privacy-content {
+.info-content {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.privacy-content strong {
+.info-section {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.info-section strong {
     display: block;
     color: var(--text-primary);
     font-weight: 600;
-    margin-bottom: 4px;
     font-size: 0.95em;
 }
 
-.privacy-content p {
+.info-section p {
     margin: 0;
     color: var(--text-secondary);
 }

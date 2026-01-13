@@ -2,7 +2,6 @@
 const translations = {
     en: {
         appTitle: "Blackboard Question Converter",
-        deanshipName: "E-Learning Deanship",
         multipleChoice: "Multiple Choice Questions",
         essay: "Essay Questions",
         trueFalse: "True/False Questions",
@@ -25,7 +24,6 @@ const translations = {
         totalQuestions: "Total Questions",
         outputPlaceholder: "Converted Blackboard questions will appear here...",
         outputHelp: "This output is in Blackboard Ultra tab-delimited format and ready for upload.",
-        footerText: "© 2025 Saudi Electronic University - E-Learning Deanship - Blackboard Question Converter. All rights reserved.",
         developedBy: "Developed by:",
         // Format descriptions
         mcqFormat: "Numbered question with choices marked with letters. Use * to mark the correct answer. Metadata (LO1, Module, etc.) is optional and will be automatically removed.",
@@ -62,7 +60,6 @@ const translations = {
     },
     ar: {
         appTitle: "محول أسئلة بلاك بورد",
-        deanshipName: "عمادة التعليم الإلكتروني",
         multipleChoice: "أسئلة الاختيار من متعدد",
         essay: "أسئلة المقال",
         trueFalse: "أسئلة صح/خطأ",
@@ -85,7 +82,6 @@ const translations = {
         totalQuestions: "إجمالي الأسئلة",
         outputPlaceholder: "ستظهر أسئلة بلاك بورد المحولة هنا...",
         outputHelp: "هذا الإخراج بتنسيق بلاك بورد الترا المفصول بعلامات التبويب وجاهز للرفع.",
-        footerText: "© 2025 الجامعة السعودية الإلكترونية - عمادة التعليم الإلكتروني - محول أسئلة بلاك بورد. جميع الحقوق محفوظة.",
         developedBy: "تم التطوير بواسطة:",
         // Format descriptions
         mcqFormat: "سؤال مرقم مع خيارات محددة بأحرف. استخدم * لتحديد الإجابة الصحيحة. البيانات الوصفية (LO1، الوحدة، إلخ) اختيارية وسيتم إزالتها تلقائياً.",
@@ -228,4 +224,3 @@ window.currentLang = currentLang;
 document.addEventListener('DOMContentLoaded', () => {
     setLanguage(currentLang);
 });
-

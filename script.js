@@ -1007,12 +1007,12 @@ function handleTabKeyboard(evt) {
  * Initializes the application
  */
 function initializeApp() {
-    // Initialize theme
-    const currentTheme = localStorage.getItem('theme') || 'light';
+    // Initialize theme (dark is default)
+    const currentTheme = localStorage.getItem('theme') || 'dark';
     document.body.className = currentTheme + '-theme';
     const themeToggle = document.getElementById('themeToggle');
     if (themeToggle) {
-        themeToggle.querySelector('.icon').textContent = currentTheme === 'light' ? '🌙' : '☀️';
+        themeToggle.querySelector('.icon').textContent = currentTheme === 'dark' ? '☀️' : '🌙';
         themeToggle.addEventListener('click', () => {
             const isDark = document.body.classList.contains('dark-theme');
             if (isDark) {

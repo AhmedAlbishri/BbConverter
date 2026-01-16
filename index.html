@@ -7,6 +7,7 @@
     <title>Blackboard Question Converter</title>
     <link rel="stylesheet" href="styles.css">
     <script src="js/translations.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body class="dark-theme">
     <!-- Header -->
@@ -338,6 +339,11 @@
                 title="Download converted questions as .txt file"
                 aria-label="Download converted questions"
                 data-i18n="download">Download as .txt</button>
+        <button onclick="downloadQTI()" 
+                class="info"
+                title="Download as QTI 2.1 Package (ZIP)"
+                aria-label="Download as QTI 2.1 Package"
+                data-i18n="downloadQTI">Download as QTI 2.1</button>
         <button onclick="clearAll()" 
                 class="secondary"
                 title="Clear all input fields and output"
@@ -379,5 +385,6 @@
 
     <!-- Link to external JS file -->
     <script src="script.js"></script>
+    <script src="js/qti_export.js"></script>
 </body>
 </html>

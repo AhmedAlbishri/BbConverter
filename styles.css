@@ -611,6 +611,14 @@ button.success:hover {
     background: linear-gradient(135deg, #059669 0%, #10b981 100%);
 }
 
+button.info {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+}
+
+button.info:hover {
+    background: linear-gradient(135deg, #6d28d9 0%, #8b5cf6 100%);
+}
+
 /* Information Notice */
 .info-notice {
     margin: 16px 0;
@@ -793,20 +801,7 @@ p strong span {
     }
 
     .sidebar-nav {
-        width: 100%;
-        position: static;
-        max-height: none;
-        margin-bottom: 16px;
-    }
-
-    .sidebar-nav ul {
-        flex-direction: row;
-        overflow-x: auto;
-        overflow-y: hidden;
-    }
-
-    .sidebar-nav ul li a {
-        white-space: nowrap;
+        display: none;
     }
 
     .content-area nav {

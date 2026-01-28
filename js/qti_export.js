@@ -265,7 +265,7 @@ function generateAssessmentTestXML(items, testId) {
 }
 
 function generateMCQXML(data) {
-    const maxChoices = data.type === 'MA' ? 0 : 1;
+    const maxChoices = data.type === 'MA' ? data.choices.length : 1;
     const card = 'multiple'; // Blackboard seems to prefer multiple for both
     const correctIds = data.choices.filter(c => c.isCorrect).map(c => c.id);
     

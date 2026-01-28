@@ -138,6 +138,8 @@ body {
     transition: var(--transition);
     font-weight: 500;
     font-size: 0.9rem;
+    box-shadow: none;
+    transform: none;
 }
 
 .lang-btn:first-child {
@@ -160,11 +162,29 @@ body {
 .lang-btn.active {
     background: white;
     color: #6b46c1;
+    box-shadow: none;
+    transform: none;
 }
 
 .lang-btn:hover:not(.active) {
     background: rgba(255, 255, 255, 0.15);
     color: white;
+    box-shadow: none;
+    transform: none;
+}
+
+.lang-btn:active {
+    box-shadow: none;
+    transform: none;
+}
+
+.lang-btn:focus {
+    box-shadow: none;
+    outline: none;
+}
+
+.lang-btn::before {
+    display: none;
 }
 
 [dir="rtl"] .header-content {

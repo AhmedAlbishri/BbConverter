@@ -43,7 +43,7 @@ const translations = {
         matchingTab: "Matching",
         numericTab: "Numeric",
         // Example texts - showing both with and without metadata
-        mcqExample: "With metadata:\n1. Which of these is NOT a step? (LO1) (Dr. Name) [Module 1] [Difficulty Level: Low]\na. Choice one\nb. Choice two*\nc. Choice three\n\nWithout metadata:\n2. What is the capital of France?\na. London\nb. Paris*\nc. Berlin",
+        mcqExample: "With metadata:\n1. Which of these is NOT a step? (LO1) (Dr. Name) [Module 1] [Difficulty Level: Low]\na. Choice one\nb. Choice two*\nc. Choice three\n\nWithout metadata:\n2. What is the capital of Saudi Arabia?\na. Jeddah\nb. Riyadh*\nc. Dammam",
         essayExample: "With metadata:\na) What is the similarity and difference between interval data and ratio data? (LO2) (Dr. Name) [Module 1] [Difficulty Level: Low]\n\nWithout metadata:\nb) Explain the concept of data analysis in your own words.",
         tfExample: "With metadata:\n1. This statement is true. (LO1) (Dr. Name) [Module 1] [Difficulty Level: Low]\nTrue*\nFalse\n\nWithout metadata:\n2. The Earth is round.\nTrue*\nFalse",
         fibExample: "With metadata:\n1. The capital of France is ____. (LO1) (Dr. Name) [Module 1] [Difficulty Level: Low]\nParis\nparis\n\nWithout metadata:\n2. The largest planet in our solar system is ____.\nJupiter",
@@ -102,7 +102,7 @@ const translations = {
         matchingTab: "مطابقة",
         numericTab: "رقمي",
         // Example texts - showing both with and without metadata
-        mcqExample: "مع البيانات الوصفية:\n1. أي من هذه ليس خطوة؟ (LO1) (د. الاسم) [الوحدة 1] [مستوى الصعوبة: منخفض]\nأ. الخيار الأول\nب. الخيار الثاني*\nج. الخيار الثالث\n\nبدون البيانات الوصفية:\n2. ما هي عاصمة فرنسا؟\nأ. لندن\nب. باريس*\nج. برلين",
+        mcqExample: "مع البيانات الوصفية:\n1. أي من هذه ليس خطوة؟ (LO1) (د. الاسم) [الوحدة 1] [مستوى الصعوبة: منخفض]\nأ. الخيار الأول\nب. الخيار الثاني*\nج. الخيار الثالث\n\nبدون البيانات الوصفية:\n2. ما هي عاصمة المملكة العربية السعودية؟\nأ. جدة\nب. الرياض*\nج. الدمام",
         essayExample: "مع البيانات الوصفية:\nأ) ما هي أوجه التشابه والاختلاف بين البيانات الفاصلة وبيانات النسبة؟ (LO2) (د. الاسم) [الوحدة 1] [مستوى الصعوبة: منخفض]\n\nبدون البيانات الوصفية:\nب) اشرح مفهوم تحليل البيانات بكلماتك الخاصة.",
         tfExample: "مع البيانات الوصفية:\n1. هذه العبارة صحيحة. (LO1) (د. الاسم) [الوحدة 1] [مستوى الصعوبة: منخفض]\nصحيح*\nخطأ\n\nبدون البيانات الوصفية:\n2. الأرض كروية.\nصحيح*\nخطأ",
         fibExample: "مع البيانات الوصفية:\n1. عاصمة فرنسا هي ____. (LO1) (د. الاسم) [الوحدة 1] [مستوى الصعوبة: منخفض]\nباريس\nparis\n\nبدون البيانات الوصفية:\n2. أكبر كوكب في نظامنا الشمسي هو ____.\nالمشتري",

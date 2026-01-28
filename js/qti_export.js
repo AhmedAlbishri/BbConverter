@@ -213,14 +213,14 @@ function generateManifest(items) {
 
     return `<?xml version="1.0" encoding="UTF-8"?>
 <manifest xmlns="http://www.imsglobal.org/xsd/imscp_v1p1"
-    xmlns:imsmd="http://www.imsglobal.org/xsd/imsmd_v1p2"
+    xmlns:imsmd="http://ltsc.ieee.org/xsd/LOM"
     xmlns:imsqti="http://www.imsglobal.org/xsd/imsqti_v2p1"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.imsglobal.org/xsd/imscp_v1p1 http://www.imsglobal.org/xsd/imscp_v1p1.xsd http://www.imsglobal.org/xsd/imsmd_v1p2 http://www.imsglobal.org/xsd/imsmd_v1p2.xsd http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/imsqti_v2p1.xsd"
+    xsi:schemaLocation="http://www.imsglobal.org/xsd/imscp_v1p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/qtiv2p1_imscpv1p2_v1p0.xsd http://ltsc.ieee.org/xsd/LOM http://www.imsglobal.org/xsd/imsmd_loose_v1p3p2.xsd http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1p2.xsd"
     identifier="manifest-${manifestId}">
   <metadata>
     <schema>IMS Content</schema>
-    <schemaversion>1.1.3</schemaversion>
+    <schemaversion>1.2.0</schemaversion>
   </metadata>
   <organizations/>
   <resources>${resourcesXML}
@@ -249,8 +249,8 @@ function generateMCQXML(data) {
     return `<?xml version="1.0" encoding="UTF-8"?>
 <assessmentItem xmlns="http://www.imsglobal.org/xsd/imsqti_v2p1"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/imsqti_v2p1.xsd"
-    identifier="${data.id}" title="Question" adaptive="false" timeDependent="false">
+    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1p2.xsd"
+    identifier="${data.id}" title="Question" adaptive="false" timeDependent="false" toolName="BbConverter" toolVersion="1.0">
   <responseDeclaration identifier="RESPONSE" cardinality="${card}" baseType="identifier">
     <correctResponse>
       ${correctXML}
@@ -274,8 +274,8 @@ function generateTFXML(data) {
     return `<?xml version="1.0" encoding="UTF-8"?>
 <assessmentItem xmlns="http://www.imsglobal.org/xsd/imsqti_v2p1"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/imsqti_v2p1.xsd"
-    identifier="${data.id}" title="True/False Question" adaptive="false" timeDependent="false">
+    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1p2.xsd"
+    identifier="${data.id}" title="True/False Question" adaptive="false" timeDependent="false" toolName="BbConverter" toolVersion="1.0">
   <responseDeclaration identifier="RESPONSE" cardinality="single" baseType="identifier">
     <correctResponse>
       <value>${correctId}</value>
@@ -296,8 +296,8 @@ function generateEssayXML(data) {
     return `<?xml version="1.0" encoding="UTF-8"?>
 <assessmentItem xmlns="http://www.imsglobal.org/xsd/imsqti_v2p1"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/imsqti_v2p1.xsd"
-    identifier="${data.id}" title="Essay Question" adaptive="false" timeDependent="false">
+    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1p2.xsd"
+    identifier="${data.id}" title="Essay Question" adaptive="false" timeDependent="false" toolName="BbConverter" toolVersion="1.0">
   <responseDeclaration identifier="RESPONSE" cardinality="single" baseType="string"/>
   <outcomeDeclaration identifier="SCORE" cardinality="single" baseType="float"/>
   <itemBody>
@@ -322,8 +322,8 @@ function generateFIBXML(data) {
     return `<?xml version="1.0" encoding="UTF-8"?>
 <assessmentItem xmlns="http://www.imsglobal.org/xsd/imsqti_v2p1"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/imsqti_v2p1.xsd"
-    identifier="${data.id}" title="Fill in Blank" adaptive="false" timeDependent="false">
+    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1p2.xsd"
+    identifier="${data.id}" title="Fill in Blank" adaptive="false" timeDependent="false" toolName="BbConverter" toolVersion="1.0">
   <responseDeclaration identifier="RESPONSE" cardinality="single" baseType="string">
     <correctResponse>
       ${valuesXML}
@@ -374,8 +374,8 @@ function generateMatchingXML(data) {
     return `<?xml version="1.0" encoding="UTF-8"?>
 <assessmentItem xmlns="http://www.imsglobal.org/xsd/imsqti_v2p1"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/imsqti_v2p1.xsd"
-    identifier="${data.id}" title="Matching Question" adaptive="false" timeDependent="false">
+    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1p2.xsd"
+    identifier="${data.id}" title="Matching Question" adaptive="false" timeDependent="false" toolName="BbConverter" toolVersion="1.0">
   <responseDeclaration identifier="RESPONSE" cardinality="multiple" baseType="directedPair">
     <correctResponse>
       ${correctResponse}
@@ -401,8 +401,8 @@ function generateNumericXML(data) {
     return `<?xml version="1.0" encoding="UTF-8"?>
 <assessmentItem xmlns="http://www.imsglobal.org/xsd/imsqti_v2p1"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/imsqti_v2p1.xsd"
-    identifier="${data.id}" title="Numeric Question" adaptive="false" timeDependent="false">
+    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1p2.xsd"
+    identifier="${data.id}" title="Numeric Question" adaptive="false" timeDependent="false" toolName="BbConverter" toolVersion="1.0">
   <responseDeclaration identifier="RESPONSE" cardinality="single" baseType="float">
     <correctResponse>
       <value>${data.answer}</value>

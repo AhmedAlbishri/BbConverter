@@ -203,24 +203,41 @@ function parseNumericData(text) {
 
 function generateManifest(items) {
     const manifestId = generateUUID();
+    const testId = generateUUID();
+    const testFilename = `qti21/question_bank_${testId}.xml`;
+    
+    let dependenciesXML = '';
+    items.forEach(item => {
+        dependenciesXML += `<dependency identifierref="${item.id}"/>`;
+    });
+
     let resourcesXML = '';
+    // Add Question Bank Resource
+    resourcesXML += `
+    <resource identifier="resource-${testId}" type="imsqti_test_xmlv2p1" href="${testFilename}">
+      <file href="${testFilename}"/>
+      ${dependenciesXML}
+    </resource>`;
+
+    // Add Item Resources
     items.forEach(item => {
         resourcesXML += `
-    <resource identifier="resource-${item.id}" type="imsqti_item_xmlv2p1" href="${item.filename}">
-      <file href="${item.filename}"/>
+    <resource identifier="${item.id}" type="imsqti_item_xmlv2p1" href="qti21/${item.filename}">
+      <file href="qti21/${item.filename}"/>
     </resource>`;
     });
 
     return `<?xml version="1.0" encoding="UTF-8"?>
 <manifest xmlns="http://www.imsglobal.org/xsd/imscp_v1p1"
+    xmlns:csm="http://www.imsglobal.org/xsd/imsccv1p2/imscsmd_v1p0"
     xmlns:imsmd="http://ltsc.ieee.org/xsd/LOM"
-    xmlns:imsqti="http://www.imsglobal.org/xsd/imsqti_v2p1"
+    xmlns:imsqti="http://www.imsglobal.org/xsd/imsqti_metadata_v2p1"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.imsglobal.org/xsd/imscp_v1p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/qtiv2p1_imscpv1p2_v1p0.xsd http://ltsc.ieee.org/xsd/LOM http://www.imsglobal.org/xsd/imsmd_loose_v1p3p2.xsd http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1p2.xsd"
+    xsi:schemaLocation="http://www.imsglobal.org/xsd/imscp_v1p1 http://www.imsglobal.org/xsd/imscp_v1p2.xsd http://ltsc.ieee.org/xsd/LOM imsmd_loose_v1p3.xsd http://www.imsglobal.org/xsd/imsqti_metadata_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_metadata_v2p1.xsd http://www.imsglobal.org/xsd/imsccv1p2/imscsmd_v1p0 http://www.imsglobal.org/profile/cc/ccv1p2/ccv1p2_imscsmd_v1p0.xsd"
     identifier="manifest-${manifestId}">
   <metadata>
-    <schema>IMS Content</schema>
-    <schemaversion>1.2.0</schemaversion>
+    <schema>QTIv2.1</schema>
+    <schemaversion>2.0</schemaversion>
   </metadata>
   <organizations/>
   <resources>${resourcesXML}
@@ -228,9 +245,28 @@ function generateManifest(items) {
 </manifest>`;
 }
 
+function generateAssessmentTestXML(items, testId) {
+    let itemRefs = '';
+    items.forEach(item => {
+        itemRefs += `<assessmentItemRef identifier="${item.id}" href="${item.filename}" />`;
+    });
+
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<assessmentTest xmlns="http://www.imsglobal.org/xsd/imsqti_v2p1"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1.xsd"
+    identifier="${testId}" title="Question Bank">
+  <testPart identifier="part_${testId}" navigationMode="nonlinear" submissionMode="simultaneous">
+    <assessmentSection identifier="section_${testId}" visible="false" title="Section 1">
+      ${itemRefs}
+    </assessmentSection>
+  </testPart>
+</assessmentTest>`;
+}
+
 function generateMCQXML(data) {
     const maxChoices = data.type === 'MA' ? 0 : 1;
-    const card = maxChoices === 1 ? 'single' : 'multiple';
+    const card = 'multiple'; // Blackboard seems to prefer multiple for both
     const correctIds = data.choices.filter(c => c.isCorrect).map(c => c.id);
     
     let correctXML = '';
@@ -241,28 +277,54 @@ function generateMCQXML(data) {
     let choicesXML = '';
     data.choices.forEach(choice => {
         choicesXML += `
-      <simpleChoice identifier="${choice.id}">
-        <p>${escapeXML(choice.text)}</p>
+      <simpleChoice identifier="${choice.id}" fixed="true">
+        <div>${escapeXML(choice.text)}</div>
       </simpleChoice>`;
     });
 
+    // Determine feedback ID (simplified for now)
+    const correctFeedbackId = "correct_fb";
+    const incorrectFeedbackId = "incorrect_fb";
+
     return `<?xml version="1.0" encoding="UTF-8"?>
 <assessmentItem xmlns="http://www.imsglobal.org/xsd/imsqti_v2p1"
+    xmlns:ns9="http://www.imsglobal.org/xsd/apip/apipv1p0/imsapip_qtiv1p0"
+    xmlns:ns8="http://www.w3.org/1999/xlink"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1p2.xsd"
-    identifier="${data.id}" title="Question" adaptive="false" timeDependent="false" toolName="BbConverter" toolVersion="1.0">
+    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1.xsd"
+    identifier="${data.id}" title="" adaptive="false" timeDependent="false">
   <responseDeclaration identifier="RESPONSE" cardinality="${card}" baseType="identifier">
     <correctResponse>
       ${correctXML}
     </correctResponse>
   </responseDeclaration>
-  <outcomeDeclaration identifier="SCORE" cardinality="single" baseType="float"/>
+  <outcomeDeclaration identifier="SCORE" cardinality="single" baseType="float">
+    <defaultValue><value>0</value></defaultValue>
+  </outcomeDeclaration>
+  <outcomeDeclaration identifier="FEEDBACKBASIC" cardinality="single" baseType="identifier"/>
+  <outcomeDeclaration identifier="MAXSCORE" cardinality="single" baseType="float">
+    <defaultValue><value>0</value></defaultValue>
+  </outcomeDeclaration>
   <itemBody>
+    <div>
+      <div>${escapeXML(data.question)}</div>
+    </div>
     <choiceInteraction responseIdentifier="RESPONSE" shuffle="false" maxChoices="${maxChoices}">
-      <prompt>${escapeXML(data.question)}</prompt>
       ${choicesXML}
     </choiceInteraction>
   </itemBody>
+  <responseProcessing>
+    <responseCondition>
+      <responseIf>
+        <match><variable identifier="RESPONSE"/><correct identifier="RESPONSE"/></match>
+        <setOutcomeValue identifier="SCORE"><variable identifier="MAXSCORE"/></setOutcomeValue>
+        <setOutcomeValue identifier="FEEDBACKBASIC"><baseValue baseType="identifier">${correctFeedbackId}</baseValue></setOutcomeValue>
+      </responseIf>
+      <responseElse>
+        <setOutcomeValue identifier="FEEDBACKBASIC"><baseValue baseType="identifier">${incorrectFeedbackId}</baseValue></setOutcomeValue>
+      </responseElse>
+    </responseCondition>
+  </responseProcessing>
 </assessmentItem>`;
 }
 
@@ -273,47 +335,72 @@ function generateTFXML(data) {
 
     return `<?xml version="1.0" encoding="UTF-8"?>
 <assessmentItem xmlns="http://www.imsglobal.org/xsd/imsqti_v2p1"
+    xmlns:ns9="http://www.imsglobal.org/xsd/apip/apipv1p0/imsapip_qtiv1p0"
+    xmlns:ns8="http://www.w3.org/1999/xlink"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1p2.xsd"
-    identifier="${data.id}" title="True/False Question" adaptive="false" timeDependent="false" toolName="BbConverter" toolVersion="1.0">
+    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1.xsd"
+    identifier="${data.id}" title="" adaptive="false" timeDependent="false">
   <responseDeclaration identifier="RESPONSE" cardinality="single" baseType="identifier">
     <correctResponse>
       <value>${correctId}</value>
     </correctResponse>
   </responseDeclaration>
-  <outcomeDeclaration identifier="SCORE" cardinality="single" baseType="float"/>
+  <outcomeDeclaration identifier="SCORE" cardinality="single" baseType="float">
+    <defaultValue><value>0</value></defaultValue>
+  </outcomeDeclaration>
+  <outcomeDeclaration identifier="FEEDBACKBASIC" cardinality="single" baseType="identifier"/>
+  <outcomeDeclaration identifier="MAXSCORE" cardinality="single" baseType="float">
+    <defaultValue><value>0</value></defaultValue>
+  </outcomeDeclaration>
   <itemBody>
+    <div>
+      <div>${escapeXML(data.question)}</div>
+    </div>
     <choiceInteraction responseIdentifier="RESPONSE" shuffle="false" maxChoices="1">
-      <prompt>${escapeXML(data.question)}</prompt>
       <simpleChoice identifier="${trueId}"><p>True</p></simpleChoice>
       <simpleChoice identifier="${falseId}"><p>False</p></simpleChoice>
     </choiceInteraction>
   </itemBody>
+  <responseProcessing>
+    <responseCondition>
+      <responseIf>
+        <match><variable identifier="RESPONSE"/><correct identifier="RESPONSE"/></match>
+        <setOutcomeValue identifier="SCORE"><variable identifier="MAXSCORE"/></setOutcomeValue>
+        <setOutcomeValue identifier="FEEDBACKBASIC"><baseValue baseType="identifier">correct_fb</baseValue></setOutcomeValue>
+      </responseIf>
+      <responseElse>
+        <setOutcomeValue identifier="FEEDBACKBASIC"><baseValue baseType="identifier">incorrect_fb</baseValue></setOutcomeValue>
+      </responseElse>
+    </responseCondition>
+  </responseProcessing>
 </assessmentItem>`;
 }
 
 function generateEssayXML(data) {
     return `<?xml version="1.0" encoding="UTF-8"?>
 <assessmentItem xmlns="http://www.imsglobal.org/xsd/imsqti_v2p1"
+    xmlns:ns9="http://www.imsglobal.org/xsd/apip/apipv1p0/imsapip_qtiv1p0"
+    xmlns:ns8="http://www.w3.org/1999/xlink"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1p2.xsd"
-    identifier="${data.id}" title="Essay Question" adaptive="false" timeDependent="false" toolName="BbConverter" toolVersion="1.0">
+    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1.xsd"
+    identifier="${data.id}" title="" adaptive="false" timeDependent="false">
   <responseDeclaration identifier="RESPONSE" cardinality="single" baseType="string"/>
-  <outcomeDeclaration identifier="SCORE" cardinality="single" baseType="float"/>
+  <outcomeDeclaration identifier="SCORE" cardinality="single" baseType="float">
+    <defaultValue><value>0</value></defaultValue>
+  </outcomeDeclaration>
+  <outcomeDeclaration identifier="MAXSCORE" cardinality="single" baseType="float">
+    <defaultValue><value>0</value></defaultValue>
+  </outcomeDeclaration>
   <itemBody>
-    <extendedTextInteraction responseIdentifier="RESPONSE">
-      <prompt>${escapeXML(data.question)}</prompt>
-    </extendedTextInteraction>
+    <div>
+      <div>${escapeXML(data.question)}</div>
+    </div>
+    <extendedTextInteraction responseIdentifier="RESPONSE"/>
   </itemBody>
 </assessmentItem>`;
 }
 
 function generateFIBXML(data) {
-    // Handling standard single-blank QTI structure. 
-    // If multiple blanks were supported, we'd need multiple interactions or a textEntryInteraction per blank.
-    // For simplicity and Blackboard compatibility, we'll map the first answer to the interaction.
-    // If multiple correct answers are provided for one blank, we list them as correct values.
-    
     let valuesXML = '';
     data.answers.forEach(ans => {
         valuesXML += `<value>${escapeXML(ans)}</value>`;
@@ -321,33 +408,32 @@ function generateFIBXML(data) {
 
     return `<?xml version="1.0" encoding="UTF-8"?>
 <assessmentItem xmlns="http://www.imsglobal.org/xsd/imsqti_v2p1"
+    xmlns:ns9="http://www.imsglobal.org/xsd/apip/apipv1p0/imsapip_qtiv1p0"
+    xmlns:ns8="http://www.w3.org/1999/xlink"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1p2.xsd"
-    identifier="${data.id}" title="Fill in Blank" adaptive="false" timeDependent="false" toolName="BbConverter" toolVersion="1.0">
+    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1.xsd"
+    identifier="${data.id}" title="" adaptive="false" timeDependent="false">
   <responseDeclaration identifier="RESPONSE" cardinality="single" baseType="string">
     <correctResponse>
       ${valuesXML}
     </correctResponse>
   </responseDeclaration>
-  <outcomeDeclaration identifier="SCORE" cardinality="single" baseType="float"/>
+  <outcomeDeclaration identifier="SCORE" cardinality="single" baseType="float">
+    <defaultValue><value>0</value></defaultValue>
+  </outcomeDeclaration>
+  <outcomeDeclaration identifier="MAXSCORE" cardinality="single" baseType="float">
+    <defaultValue><value>0</value></defaultValue>
+  </outcomeDeclaration>
   <itemBody>
-    <p>${escapeXML(data.question)}</p>
+    <div>
+      <div>${escapeXML(data.question)}</div>
+    </div>
     <textEntryInteraction responseIdentifier="RESPONSE"/>
   </itemBody>
 </assessmentItem>`;
 }
 
 function generateMatchingXML(data) {
-    // QTI 2.1 Matching
-    let simpleMatchSets = '';
-    let targetSet = '';
-    let correctResponse = '';
-    
-    // Create source set (left side) and target set (right side)
-    // Actually, matchInteraction defines two matchSets usually.
-    // Left items: source, Right items: target.
-    
-    // We need to generate unique IDs for choices
     const leftIds = data.pairs.map((p, i) => `L${i}`);
     const rightIds = data.pairs.map((p, i) => `R${i}`);
     
@@ -367,24 +453,34 @@ function generateMatchingXML(data) {
         </simpleAssociableChoice>`;
     });
     
+    let correctResponse = '';
     data.pairs.forEach((p, i) => {
         correctResponse += `<value>${leftIds[i]} ${rightIds[i]}</value> `;
     });
 
     return `<?xml version="1.0" encoding="UTF-8"?>
 <assessmentItem xmlns="http://www.imsglobal.org/xsd/imsqti_v2p1"
+    xmlns:ns9="http://www.imsglobal.org/xsd/apip/apipv1p0/imsapip_qtiv1p0"
+    xmlns:ns8="http://www.w3.org/1999/xlink"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1p2.xsd"
-    identifier="${data.id}" title="Matching Question" adaptive="false" timeDependent="false" toolName="BbConverter" toolVersion="1.0">
+    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1.xsd"
+    identifier="${data.id}" title="" adaptive="false" timeDependent="false">
   <responseDeclaration identifier="RESPONSE" cardinality="multiple" baseType="directedPair">
     <correctResponse>
       ${correctResponse}
     </correctResponse>
   </responseDeclaration>
-  <outcomeDeclaration identifier="SCORE" cardinality="single" baseType="float"/>
+  <outcomeDeclaration identifier="SCORE" cardinality="single" baseType="float">
+    <defaultValue><value>0</value></defaultValue>
+  </outcomeDeclaration>
+  <outcomeDeclaration identifier="MAXSCORE" cardinality="single" baseType="float">
+    <defaultValue><value>0</value></defaultValue>
+  </outcomeDeclaration>
   <itemBody>
+    <div>
+      <div>${escapeXML(data.question)}</div>
+    </div>
     <matchInteraction responseIdentifier="RESPONSE" shuffle="false" maxAssociations="${data.pairs.length}">
-      <prompt>${escapeXML(data.question)}</prompt>
       <simpleMatchSet>
         ${sourceChoices}
       </simpleMatchSet>
@@ -397,25 +493,32 @@ function generateMatchingXML(data) {
 }
 
 function generateNumericXML(data) {
-    // Numeric can be handled with textEntryInteraction bound to float/int
     return `<?xml version="1.0" encoding="UTF-8"?>
 <assessmentItem xmlns="http://www.imsglobal.org/xsd/imsqti_v2p1"
+    xmlns:ns9="http://www.imsglobal.org/xsd/apip/apipv1p0/imsapip_qtiv1p0"
+    xmlns:ns8="http://www.w3.org/1999/xlink"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1p2.xsd"
-    identifier="${data.id}" title="Numeric Question" adaptive="false" timeDependent="false" toolName="BbConverter" toolVersion="1.0">
+    xsi:schemaLocation="http://www.imsglobal.org/xsd/imsqti_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_v2p1.xsd"
+    identifier="${data.id}" title="" adaptive="false" timeDependent="false">
   <responseDeclaration identifier="RESPONSE" cardinality="single" baseType="float">
     <correctResponse>
       <value>${data.answer}</value>
     </correctResponse>
   </responseDeclaration>
-  <outcomeDeclaration identifier="SCORE" cardinality="single" baseType="float"/>
+  <outcomeDeclaration identifier="SCORE" cardinality="single" baseType="float">
+    <defaultValue><value>0</value></defaultValue>
+  </outcomeDeclaration>
+  <outcomeDeclaration identifier="MAXSCORE" cardinality="single" baseType="float">
+    <defaultValue><value>0</value></defaultValue>
+  </outcomeDeclaration>
   <itemBody>
-    <p>${escapeXML(data.question)}</p>
+    <div>
+      <div>${escapeXML(data.question)}</div>
+    </div>
     <textEntryInteraction responseIdentifier="RESPONSE"/>
   </itemBody>
 </assessmentItem>`;
 }
-
 
 // ============================================================================
 // MAIN DOWNLOAD FUNCTION
@@ -437,11 +540,9 @@ async function downloadQTI() {
         if (!text.trim()) return;
 
         // Split regex depends on type slightly, reusing logic from script.js roughly
-        // But for parsing, we just need to split into blocks and parse
         let blocks = [];
         if (id === 'mcqText' || id === 'tfText' || id === 'fibText' || id === 'maText' || id === 'matText' || id === 'numText') {
              blocks = text.split(/\n(?=\d+\.\s+)/).filter(b => b.trim());
-             // Fallback if no numbers
              if (blocks.length === 0 && text.trim()) blocks = [text];
         } else if (id === 'essayText') {
              blocks = text.split(/\n(?=\d+\.\s+|[a-z\u0600-\u06FF]\)\s+)/i).filter(b => b.trim());
@@ -451,8 +552,9 @@ async function downloadQTI() {
             const data = parser(block);
             if (data) {
                 const xml = generator(data);
+                // Items go in qti21/ folder
                 const filename = `item_${data.id}.xml`;
-                zip.file(filename, xml);
+                zip.file(`qti21/${filename}`, xml);
                 items.push({ id: data.id, filename: filename });
                 hasQuestions = true;
             }
@@ -464,7 +566,7 @@ async function downloadQTI() {
     processTextArea('essayText', parseEssayData, generateEssayXML);
     processTextArea('tfText', parseTFData, generateTFXML);
     processTextArea('fibText', parseFIBData, generateFIBXML);
-    processTextArea('maText', parseMAData, generateMCQXML); // MA uses same XML structure as MCQ but different cardinality
+    processTextArea('maText', parseMAData, generateMCQXML); 
     processTextArea('matText', parseMatchingData, generateMatchingXML);
     processTextArea('numText', parseNumericData, generateNumericXML);
 
@@ -477,8 +579,34 @@ async function downloadQTI() {
         return;
     }
 
-    // Generate Manifest
-    const manifestXML = generateManifest(items);
+    // Generate Question Bank (Assessment Test)
+    // Extract test ID from manifest logic (needs to be consistent)
+    // Actually, generateAssessmentTestXML needs a test ID.
+    // generateManifest calls items. But we need to coordinate the test ID if we want consistency, 
+    // although manifest just needs to point to the file.
+    
+    // Let's generate the test file first
+    // We'll peek into generateManifest to see how it handles the test ID
+    // Better yet, refactor generateManifest to return the test ID or accept it?
+    // Current generateManifest generates a new test ID internally. 
+    // Wait, I updated generateManifest above to generate the test ID internally and return the XML.
+    // BUT I also need the test XML content itself!
+    // The previous implementation of generateManifest returned just the manifest XML string.
+    // I need to extract the test generation logic or split it.
+    
+    // Let's modify the flow slightly:
+    // 1. Generate items (done above)
+    // 2. Generate Test ID
+    const testId = generateUUID();
+    const testFilename = `question_bank_${testId}.xml`;
+    
+    // 3. Generate Test XML
+    const testXML = generateAssessmentTestXML(items, testId);
+    zip.file(`qti21/${testFilename}`, testXML);
+    
+    // 4. Generate Manifest (passing test info)
+    // I need to update generateManifest to accept testId and testFilename instead of generating them
+    const manifestXML = generateManifestWithTest(items, testId, testFilename);
     zip.file('imsmanifest.xml', manifestXML);
 
     // Generate ZIP
@@ -504,5 +632,48 @@ async function downloadQTI() {
     }
 }
 
+function generateManifestWithTest(items, testId, testFilename) {
+    const manifestId = generateUUID();
+    
+    let dependenciesXML = '';
+    items.forEach(item => {
+        dependenciesXML += `<dependency identifierref="${item.id}"/>`;
+    });
+
+    let resourcesXML = '';
+    // Add Question Bank Resource (Note: testFilename includes qti21/ prefix if passed that way)
+    // In downloadQTI, we pass `question_bank_${testId}.xml`. We need to prepend qti21/ for href.
+    
+    resourcesXML += `
+    <resource identifier="resource-${testId}" type="imsqti_test_xmlv2p1" href="qti21/${testFilename}">
+      <file href="qti21/${testFilename}"/>
+      ${dependenciesXML}
+    </resource>`;
+
+    // Add Item Resources
+    items.forEach(item => {
+        resourcesXML += `
+    <resource identifier="${item.id}" type="imsqti_item_xmlv2p1" href="qti21/${item.filename}">
+      <file href="qti21/${item.filename}"/>
+    </resource>`;
+    });
+
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<manifest xmlns="http://www.imsglobal.org/xsd/imscp_v1p1"
+    xmlns:csm="http://www.imsglobal.org/xsd/imsccv1p2/imscsmd_v1p0"
+    xmlns:imsmd="http://ltsc.ieee.org/xsd/LOM"
+    xmlns:imsqti="http://www.imsglobal.org/xsd/imsqti_metadata_v2p1"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.imsglobal.org/xsd/imscp_v1p1 http://www.imsglobal.org/xsd/imscp_v1p2.xsd http://ltsc.ieee.org/xsd/LOM imsmd_loose_v1p3.xsd http://www.imsglobal.org/xsd/imsqti_metadata_v2p1 http://www.imsglobal.org/xsd/qti/qtiv2p1/imsqti_metadata_v2p1.xsd http://www.imsglobal.org/xsd/imsccv1p2/imscsmd_v1p0 http://www.imsglobal.org/profile/cc/ccv1p2/ccv1p2_imscsmd_v1p0.xsd"
+    identifier="manifest-${manifestId}">
+  <metadata>
+    <schema>QTIv2.1</schema>
+    <schemaversion>2.0</schemaversion>
+  </metadata>
+  <organizations/>
+  <resources>${resourcesXML}
+  </resources>
+</manifest>`;
+}
 // Attach to window
 window.downloadQTI = downloadQTI;

@@ -16,6 +16,7 @@ Converts SEU-formatted exam questions to Blackboard Ultra tab-delimited format.
 - English/Arabic language support
 - Local processing (no data stored)
 - Question counter
-- Download as .txt file
+- Download as a .txt file
+- Export as QTI 2.1 Package 
 
 **Try it here:** [https://ahmedalbishri.github.io/BbConverter/](https://ahmedalbishri.github.io/BbConverter/)

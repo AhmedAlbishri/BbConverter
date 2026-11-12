@@ -1,6 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /js/
-Disallow: /styles.css
 
-Sitemap: https://ahmedalbishri.github.io/BbConverter/sitemap.xml
+Sitemap: https://bbconverter.ahmedalbishri.com/sitemap.xml

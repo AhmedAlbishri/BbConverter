@@ -25,3 +25,6 @@ dist-ssr
 IMPLEMENTATION.md
 SEU_Questions_Template.MD
 qti_imp.MD
+
+# Wrangler local state
+.wrangler/
